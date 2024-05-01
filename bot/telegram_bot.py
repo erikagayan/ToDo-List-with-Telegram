@@ -1,5 +1,6 @@
 import aiohttp
 from aiogram import Bot, Dispatcher
+from telegram_api.models import TelegramUser
 from aiogram.filters import Command
 from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
 import asyncio
@@ -43,6 +44,14 @@ class TaskForm(StatesGroup):
 
 @dp.message(Command("add_task"))
 async def add_task_start(message: Message, state: FSMContext):
+    username = message.from_user.username
+    if username is None:
+        await message.answer(
+            "Извините, но ваш аккаунт Telegram не имеет username. Пожалуйста, установите username в настройках Telegram для использования этой функции.")
+        return
+
+    # Сохраняем username в контексте состояния
+    await state.update_data(username=username)
     await message.answer("Введите название задачи:")
     await state.set_state(TaskForm.title)
 
@@ -63,10 +72,37 @@ async def process_description(message: Message, state: FSMContext):
     await message.answer("Введите дату выполнения задачи (формат ГГГГ-ММ-ДД):")
 
 
+async def get_telegram_user_by_username(username):
+    async with aiohttp.ClientSession() as session:
+        response = await session.get(f'http://localhost:8000/api/telegram_users/?username={username}')
+        if response.status == 200:
+            data = await response.json()
+            if data:
+                return TelegramUser(**data[0])
+        return None
+
 # Handler for processing the due date of the task
 async def create_task(task_data):
     async with aiohttp.ClientSession() as session:
-        await session.post('http://localhost:8000/api/tasks/tasks/', json=task_data)
+        # Получаем username из контекста состояния
+        username = task_data.get('username')
+        if username is None:
+            print("Не удалось получить username пользователя.")
+            return
+
+        # Поиск пользователя по username
+        telegram_user = await get_telegram_user_by_username(username)
+        if telegram_user is None:
+            print(f"Пользователь с username {username} не найден.")
+            return
+
+        # Создание задачи, связанной с пользователем
+        task_data['user'] = telegram_user.user.id
+        response = await session.post('http://localhost:8000/api/tasks/tasks/', json=task_data)
+        if response.status == 201:
+            print("Задача успешно создана")
+        else:
+            print("Ошибка при создании задачи", response.status)
 
 
 @dp.message(TaskForm.due_date)

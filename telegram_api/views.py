@@ -1,7 +1,7 @@
 from django.shortcuts import render
-from rest_framework import mixins, viewsets
-from telegram_api.models import Task
-from telegram_api.serializers import TaskSerializer
+from rest_framework import mixins, viewsets, generics
+from telegram_api.models import Task, TelegramUser
+from telegram_api.serializers import TaskSerializer, TelegramUserSerializer
 
 
 class TaskViewSet(
@@ -14,3 +14,9 @@ class TaskViewSet(
 ):
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
+
+
+class TelegramUserByUsername(generics.RetrieveAPIView):
+    queryset = TelegramUser.objects.all()
+    serializer_class = TelegramUserSerializer
+    lookup_field = 'username'
