@@ -1,14 +1,8 @@
 from rest_framework import serializers
-from telegram_api.models import Task, TelegramUser
+from telegram_api.models import Task
 
 
 class TaskSerializer(serializers.ModelSerializer):
     class Meta:
         model = Task
         fields = ['id', 'title', 'description', 'due_date', 'completed']
-
-
-class TelegramUserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TelegramUser
-        fields = ['id', 'user', 'username']
