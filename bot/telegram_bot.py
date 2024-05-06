@@ -64,10 +64,11 @@ async def process_description(message: Message, state: FSMContext):
 
 
 # Handler for processing the due date of the task
-async def create_task(task_data):
+async def create_task(task_data, telegram_id):
+    task_data['telegram_id'] = telegram_id
     async with aiohttp.ClientSession() as session:
-        await session.post('http://localhost:8000/api/tasks/tasks/', json=task_data)
-
+        response = await session.post('http://localhost:8000/api/tasks/tasks/', json=task_data)
+        print(await response.text())  # Для отладки
 
 @dp.message(TaskForm.due_date)
 async def process_due_date(message: Message, state: FSMContext):
@@ -75,8 +76,8 @@ async def process_due_date(message: Message, state: FSMContext):
     data = await state.get_data()
     await state.clear()
     await message.answer("Задача сохранена!")
-    # Send data to the server
-    await create_task(data)
+    # Отправляем данные вместе с Telegram ID пользователя
+    await create_task(data, message.from_user.id)
 
 #
 
