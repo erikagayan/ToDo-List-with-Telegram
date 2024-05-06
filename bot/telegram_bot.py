@@ -1,19 +1,20 @@
-import aiohttp
+import os
+import bot_add_task
+from typing import Any
+from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message, KeyboardButton, ReplyKeyboardMarkup
-import asyncio
-from aiogram.fsm.state import State, StatesGroup
-from aiogram.fsm.context import FSMContext
-import bot_add_task
 
-
-API_TOKEN = '6999401311:AAHwxbf7VUQHCBYMLujabw_t46NDgNhL2K8'
+load_dotenv()
+API_TOKEN = os.getenv("API_TOKEN")
+if not API_TOKEN:
+    raise ValueError("API token not found! Check the .env file")
 
 bot = Bot(token=API_TOKEN)
 dp = Dispatcher()
 
-# Кнопки
+"""Bot buttons"""
 keyboard_commands = ReplyKeyboardMarkup(
     keyboard=[
         [KeyboardButton(text="/list_tasks"), KeyboardButton(text="/add_task")],
@@ -23,16 +24,21 @@ keyboard_commands = ReplyKeyboardMarkup(
     resize_keyboard=True
 )
 
-async def on_startup(_):
-    print("Бот запущен!")
 
+async def on_startup(_) -> None:
+    print("The bot is up and running!")
+
+
+# Start command
 @dp.message(Command("start"))
-async def send_welcome(message: Message):
-    welcome_text = "Привет! Вот список доступных команд:"
+async def send_welcome(message: Message) -> None:
+    welcome_text = "Hi! Here's a list of available commands:"
     await message.answer(text=welcome_text, reply_markup=keyboard_commands)
 
-# Регистрация обработчиков для функционала добавления задачи
+
+# Add task button
 bot_add_task.register_handlers(dp)
+
 
 if __name__ == '__main__':
     dp.run_polling(bot, on_startup=on_startup)
