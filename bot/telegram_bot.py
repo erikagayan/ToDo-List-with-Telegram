@@ -79,7 +79,6 @@ async def process_due_date(message: Message, state: FSMContext):
     # Отправляем данные вместе с Telegram ID пользователя
     await create_task(data, message.from_user.id)
 
-#
 
 if __name__ == '__main__':
     dp.run_polling(bot, on_startup=on_startup)
