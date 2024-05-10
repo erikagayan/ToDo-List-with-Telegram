@@ -5,6 +5,7 @@ from aiogram.types import Message
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
 from typing import Dict, Any
+from datetime import datetime
 
 
 # Defining the state for adding a task
@@ -42,6 +43,15 @@ async def create_task(task_data: Dict[str, Any], telegram_id: int) -> None:
 
 # Process the task end date and finalise the task
 async def process_due_date(message: Message, state: FSMContext) -> None:
+    # Проверка корректности даты
+    try:
+        # Преобразование текста в дату для проверки формата
+        datetime.strptime(message.text, "%Y-%m-%d")
+    except ValueError:
+        # Отправка сообщения об ошибке, если дата некорректна
+        await message.answer("The date format is incorrect. Please enter the date in YYYY-MM-DD format.")
+        return
+
     await state.update_data(due_date=message.text)
     data = await state.get_data()
     await state.clear()
