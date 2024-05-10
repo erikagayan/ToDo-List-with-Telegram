@@ -1,5 +1,6 @@
 import os
 import bot_add_task
+import bot_list_tasks
 from typing import Any
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
@@ -38,6 +39,7 @@ async def send_welcome(message: Message) -> None:
 
 # Add task button
 bot_add_task.register_handlers(dp)
+bot_list_tasks.register_handlers(dp)
 
 
 if __name__ == '__main__':
