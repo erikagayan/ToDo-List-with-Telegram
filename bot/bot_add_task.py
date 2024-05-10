@@ -43,13 +43,18 @@ async def create_task(task_data: Dict[str, Any], telegram_id: int) -> None:
 
 # Process the task end date and finalise the task
 async def process_due_date(message: Message, state: FSMContext) -> None:
-    # Проверка корректности даты
+    # Checking if the date is correct
     try:
-        # Преобразование текста в дату для проверки формата
-        datetime.strptime(message.text, "%Y-%m-%d")
+        due_date = datetime.strptime(message.text, "%Y-%m-%d").date()
     except ValueError:
-        # Отправка сообщения об ошибке, если дата некорректна
         await message.answer("The date format is incorrect. Please enter the date in YYYY-MM-DD format.")
+        return
+
+    # Check that the entered date is not earlier than today's date
+    today = datetime.now().date()
+    if due_date < today:
+        await message.answer(
+            "You cannot create a task with a date in the past. Please enter today's date or a future date.")
         return
 
     await state.update_data(due_date=message.text)
