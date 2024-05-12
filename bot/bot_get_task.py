@@ -4,16 +4,16 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.filters import Command
 
-# Определение состояний для FSM
+
 class GetTaskForm(StatesGroup):
     waiting_for_task_id = State()
 
-# Начало диалога по получению задачи
+
 async def get_task_start(message: types.Message, state: FSMContext) -> None:
     await message.answer("Please enter the task ID:")
     await state.set_state(GetTaskForm.waiting_for_task_id)
 
-# Обработка введённого ID задачи
+
 async def get_task_id(message: types.Message, state: FSMContext) -> None:
     task_id = message.text
     if not task_id.isdigit():
@@ -24,7 +24,6 @@ async def get_task_id(message: types.Message, state: FSMContext) -> None:
         response = await session.get(f"http://localhost:8000/api/tasks/tasks/{task_id}")
         if response.status == 200:
             task = await response.json()
-            # Проверка, что задача принадлежит пользователю
             if task['telegram_id'] == message.from_user.id:
                 task_details = (
                     f"Task ID: {task['id']}\n"
@@ -40,7 +39,7 @@ async def get_task_id(message: types.Message, state: FSMContext) -> None:
             await message.answer("Task not found or error retrieving the task.")
     await state.clear()
 
-# Регистрация обработчиков в диспетчере
+
 def register_handlers(dp: Dispatcher) -> None:
     dp.message.register(get_task_start, Command("get_task"))
     dp.message.register(get_task_id, GetTaskForm.waiting_for_task_id)
