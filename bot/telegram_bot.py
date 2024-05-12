@@ -2,6 +2,7 @@ import os
 import bot_add_task
 import bot_get_task
 import bot_list_tasks
+import bot_delete_task
 from typing import Any
 from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
@@ -42,6 +43,7 @@ async def send_welcome(message: Message) -> None:
 bot_add_task.register_handlers(dp)
 bot_list_tasks.register_handlers(dp)
 bot_get_task.register_handlers(dp)
+bot_delete_task.register_handlers(dp)
 
 
 if __name__ == '__main__':
