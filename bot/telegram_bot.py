@@ -1,6 +1,7 @@
 import os
 import bot_add_task
 import bot_get_task
+import bot_edit_task
 import bot_list_tasks
 import bot_delete_task
 from typing import Any
@@ -41,8 +42,9 @@ async def send_welcome(message: Message) -> None:
 
 # Add task button
 bot_add_task.register_handlers(dp)
-bot_list_tasks.register_handlers(dp)
 bot_get_task.register_handlers(dp)
+bot_edit_task.register_handlers(dp)
+bot_list_tasks.register_handlers(dp)
 bot_delete_task.register_handlers(dp)
 
 
